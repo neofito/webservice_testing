@@ -1,4 +1,4 @@
-El contenido de este repositorio se corresponde con todo el material necesario utilizado en el articulo "Jugando con un Web Service, WS_Security y OWASP ZAP scripting" de mi blog:
+El contenido de este repositorio se corresponde con todo el material necesario utilizado en el articulo "[Jugando con un Web Service, WS_Security y OWASP ZAP scripting](http://neosysforensics.blogspot.com/2015/08/jugando-con-un-web-service-ws-security.html)" de mi blog:
 
 * El directorio `library-ws` contiene el código fuente java del Web Service.
 * El fichero `chNonce.py` es un script para modificar "al vuelo" las peticiones enviadas a través del proxy OWASP ZAP.
