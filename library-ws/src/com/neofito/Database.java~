@@ -1,0 +1,139 @@
+package com.neofito;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+
+public class Database 
+{
+	private Connection connection = null;
+	private Statement statement = null;
+	private ResultSet resultset = null;
+	
+	private static final String DB_HOST = "localhost";
+	private static final String DB_PORT = "3306";
+	private static final String DB_NAME = "library";
+	private static final String DB_USER = "root";
+	private static final String DB_PASS = "root";
+	
+	private Connection doConnect() throws DatabaseException
+	{		
+		String connectionuri = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			connection = DriverManager.getConnection(connectionuri, DB_USER, DB_PASS);
+			connection.setAutoCommit(true);
+			return connection;
+		} catch (ClassNotFoundException e) {
+            throw new DatabaseException("No se puede localizar el driver indicado ", e);
+        } catch (SQLException e) {
+            throw new DatabaseException("Imposible realizar la conexion con la db ", e);
+        }
+		
+	}
+	
+	public boolean addBook(Book book) throws DatabaseException, LibraryManagementException
+	{
+		if(getBookInfo(book.getIsbn()) == null)	{
+			
+			try {
+				connection = doConnect();
+				statement = connection.createStatement();
+			
+				String sqlcommand = "INSERT INTO books VALUES ('"
+									+ book.getIsbn()   + "','"
+									+ book.getTitulo() + "','"
+									+ book.getAutor()  + "')";
+			
+				statement.execute(sqlcommand);
+				
+				return true;
+			} catch (SQLException e) {
+				throw new DatabaseException("No se puede ejecutar la consulta ", e);
+			} finally {				
+				if (statement != null)
+					try { statement.close(); }
+					catch (SQLException e) { e.printStackTrace(); } 
+					
+				if (connection != null)
+					try { connection.close(); }
+					catch (SQLException e) { e.printStackTrace(); }
+			}			
+		} else
+			throw new LibraryManagementException("El libro ya esta dado de alta");
+	}
+	
+	public Book getBookInfo(String isbn) throws DatabaseException
+	{
+		String bookIsbn = null;
+		String bookTitulo = null;
+		String bookAutor = null;
+		
+		connection = doConnect();
+		
+		try {
+			statement = connection.createStatement();
+		} catch (SQLException e) {
+			throw new DatabaseException("No se puede ejecutar la consulta", e);
+		}
+		
+		String sqlcommand = "SELECT * FROM books WHERE isbn = '" + isbn + "'";
+		try {
+			resultset = statement.executeQuery(sqlcommand);
+			
+			Book book = null;
+			while (resultset.next()) {
+				bookIsbn = resultset.getString("isbn");
+				bookTitulo = resultset.getString("titulo");
+				bookAutor = resultset.getString("autor");
+				
+				book = new Book();
+				book.setIsbn(bookIsbn);
+				book.setTitulo(bookTitulo);
+				book.setAutor(bookAutor);
+			}
+			
+			return book;
+		} catch (SQLException e) {
+			throw new DatabaseException("No se puede ejecutar la consulta ", e);
+		} finally {
+			if (statement != null)
+				try { statement.close(); }
+				catch (SQLException e) { e.printStackTrace(); } 
+				
+			if (connection != null)
+				try { connection.close(); }
+				catch (SQLException e) { e.printStackTrace(); }
+		}
+	}
+	
+	public void deleteBook(String isbn) throws DatabaseException, LibraryManagementException
+	{
+		if (getBookInfo(isbn) != null)
+		{
+			try {
+				connection = doConnect();
+				statement = connection.createStatement();
+				
+				String sqlcommand = "DELECT FROM books WHERE isbn = '" + isbn + "'";
+				statement.execute(sqlcommand);
+			} catch (SQLException e) {
+				throw new DatabaseException("No se puede ejecutar la consulta ", e);
+			} finally {
+				if (statement != null)
+					try { statement.close(); }
+					catch (SQLException e) { e.printStackTrace(); } 
+					
+				if (connection != null)
+					try { connection.close(); }
+					catch (SQLException e) { e.printStackTrace(); }
+			}
+			
+		}
+	}
+	
+}

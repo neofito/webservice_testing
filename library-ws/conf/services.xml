@@ -1,0 +1,62 @@
+<serviceGroup name="library-ws">
+   <service name="LibraryManagementService" targetNamespace="http://neofito/library/book">
+      <description>
+         Library management web service
+      </description>
+      <schema schemaNamespace="http://neofito/library/book/types" elementFormDefaultQualified="true">
+         <mapping namespace="http://neofito/library/book/types" package="com.neofito"/>
+      </schema>
+      <!--Security policy to authenticate users -->
+      <wsp:Policy wsu:Id="UTOverTransport" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+         <wsp:ExactlyOne>
+            <wsp:All>
+               <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                  <wsp:Policy>
+                      <sp:TransportToken>
+                         <wsp:Policy>
+                            <!--<sp:HttpsToken RequireClientCertificate="false"/> -->
+                         </wsp:Policy>
+                      </sp:TransportToken>
+                      <sp:AlgorithmSuite>
+                         <wsp:Policy>
+                            <sp:Basic128/>
+                         </wsp:Policy>
+                      </sp:AlgorithmSuite>
+                      <sp:Layout>
+                         <wsp:Policy>
+                            <sp:Lax/>
+                         </wsp:Policy>
+                      </sp:Layout>
+                      <sp:IncludeTimestamp/>
+                  </wsp:Policy>
+               </sp:TransportBinding>
+               <sp:SignedSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"> 
+                  <wsp:Policy>
+                     <sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient" />
+                  </wsp:Policy>
+               </sp:SignedSupportingTokens>
+               <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+                  <ramp:passwordCallbackClass>com.neofito.PWCBHandler</ramp:passwordCallbackClass>
+               </ramp:RampartConfig>
+            </wsp:All>
+         </wsp:ExactlyOne>
+      </wsp:Policy>
+      <module ref="rampart" />
+      <messageReceivers>
+         <messageReceiver mep="http://www.w3.org/2006/01/wsdl/in-out" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+      </messageReceivers>
+      <parameter name="ServiceClass">com.neofito.LibraryManagementService</parameter>
+      <operation name="addBook" mep="http://www.w3.org/2006/01/wsdl/in-out">
+         <actionMapping>urn:addBook</actionMapping>
+         <messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+      </operation>
+      <operation name="getBookInfo" mep="http://www.w3.org/2006/01/wsdl/in-out">
+         <actionMapping>urn:getBookInfo</actionMapping>
+         <messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+      </operation>
+      <operation name="deleteBook" mep="http://www.w3.org/2006/01/wsdl/in-out">
+         <actionMapping>urn:deleteBook</actionMapping>
+         <messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+      </operation>
+   </service>
+</serviceGroup>
